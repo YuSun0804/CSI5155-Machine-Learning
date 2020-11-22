@@ -80,12 +80,16 @@ n6 = np.array([0.5983,0.9699,0.9936,0.9967,0.9856,0.9940,0.9868,0.5919,0.7832,0.
 # print(stats.ttest_rel(nn1[4],nn1[3]))
 # print(stats.ttest_rel(nn1[5],nn1[3]))
 
-data1 = [1,2,3]
-data2 = [2,3,1]
-data3 = [1,2,2]
-data4 = [2,3,1]
+data1 = [1,2]
+data2 = [1,2]
+data3 = [2,1]
+data4 = [1,2]
+data5 = [2,1]
+data6 = [1,2]
+data7 = [2,1]
+data8 = [1,2]
 
-data=[data1,data2,data3,data4]
+data=[data1,data2,data3,data4,data5,data6,data7,data8]
 data=np.array(data)
 
 r1=data.mean()
@@ -104,6 +108,6 @@ import matplotlib.pyplot as plt
 names = ["SVM", "KNN", "RF" ]
 avranks =  [2.5, 1.5, 1.75]
 cd = compute_CD(avranks, 4) #tested on 4 datasets
-print(cd)
+# print(cd)
 graph_ranks(avranks, names, cd=cd, width=6, textspace=1.5)
 plt.show()
