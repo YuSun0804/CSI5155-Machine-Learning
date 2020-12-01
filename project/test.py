@@ -1,8 +1,5 @@
-import pandas as pd
+from scipy import stats
 import numpy as np
-num_series = pd.Series(np.random.randint(1, 10, 9))
-print("Original Series:")
-print(num_series)
-result = np.argwhere(num_series)
-print("Positions of numbers that are multiples of 5:")
-print(result)
+a = np.array([-1, -1, 0, 0, 1, 1, 1])
+b = np.arange(7)
+print(stats.pointbiserialr(a, b))
