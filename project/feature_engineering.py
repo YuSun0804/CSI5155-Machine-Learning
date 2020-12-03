@@ -5,6 +5,8 @@ from sklearn.preprocessing import LabelEncoder
 from imblearn.over_sampling import SMOTE 
 from imblearn.combine import SMOTEENN
 from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.feature_selection import SelectFromModel
 
 numeric_columns = ['time_in_hospital', 'num_lab_procedures', 'num_procedures',
                    'num_medications', 'number_outpatient', 'number_emergency', 'number_inpatient', 'number_diagnoses']
@@ -100,71 +102,102 @@ if __name__ == "__main__":
     data = pd.read_csv(r"dataset_diabetes/diabetic_data.csv", sep=",")
     data = data.replace('?', np.nan)
     print(data.shape)
-    numeric_data = data[numeric_columns]
     print(data.isna().sum())
-    numeric_data.hist()
 
-    plt.figure()
-    numeric_data.boxplot()
-
-    fig, axs = plt.subplots(3,3)
     data_X = data.iloc[:, 0:49]
-    category_data = data_X.drop(numeric_columns+exclude_columns, axis=1)
-    for i, c in enumerate(category_data.columns):
-        print('-------------------------------------------')
-        # print(category_data[c].value_counts())
-        val_count = category_data[c].value_counts()
-        index = i % 9        
-        if i > 8 and index == 0:
-            fig, axs = plt.subplots(3,3)   
-        if(val_count.size > 5):
-            val_count = val_count[0:5]
-        for vid, value in enumerate(val_count): 
-            axs[index//3][index % 3].text(value, vid, str(value))
-        val_count.plot(kind='barh', ax=axs[index//3][index % 3], title=c)
-    
     data_y = data.iloc[:, 49:50]
-    plt.figure()
-    data_y.value_counts().plot(kind='barh', title=data_y.columns[0])
-    
 
-    # exclude_columns = exclude_columns + ['examide', 'citoglipton', 'weight', 'payer_code']
-    # category_columns = data_X.columns.to_list()
-    # for c in exclude_columns:
-    #     category_columns.remove(c)
-    # for c in numeric_columns:
-    #     category_columns.remove(c)
-    
-    # data_X = data_X.drop(exclude_columns, axis=1)
-   
-    # diag_mapping =  get_diag_mapping(data_X['diag_1'].astype(str),data_X['diag_2'].astype(str),data_X['diag_3'].astype(str))
-    # data_X['diag_1'] = data_X['diag_1'].map(diag_mapping)
-    # data_X['diag_2'] = data_X['diag_2'].map(diag_mapping)
-    # data_X['diag_3'] = data_X['diag_3'].map(diag_mapping)
+    # numeric_data = data_X[numeric_columns]
+    # numeric_data.hist()
 
-   
-    # for f_pair in [['A1Cresult', 'change']]:
-    #     data_X['_'.join(f_pair)] = data_X[f_pair[0]]+data_X[f_pair[1]]
-    #     category_columns.append('_'.join(f_pair))
-    # # data_X = pd.get_dummies(data_X, columns=category_columns)
-    # for cat in category_columns:
-    #     data_X[cat] = LabelEncoder().fit_transform(data_X[cat].astype(str))
-    
-    
-    # data_X[numeric_columns] = StandardScaler().fit_transform(data_X[numeric_columns])
+    # plt.figure()
+    # numeric_data.boxplot()
 
-    # # data_X = data_X.drop(['diag_2', 'diag_3'], axis=1)
-
+    # fig, axs = plt.subplots(3,3)
+    # category_data = data_X.drop(numeric_columns+exclude_columns, axis=1)
+    # for i, c in enumerate(category_data.columns):
+    #     print('-------------------------------------------')
+    #     # print(category_data[c].value_counts())
+    #     val_count = category_data[c].value_counts()
+    #     index = i % 9        
+    #     if i > 8 and index == 0:
+    #         fig, axs = plt.subplots(3,3)   
+    #     if(val_count.size > 5):
+    #         val_count = val_count[0:5]
+    #     for vid, value in enumerate(val_count): 
+    #         axs[index//3][index % 3].text(value, vid, str(value))
+    #     val_count.plot(kind='barh', ax=axs[index//3][index % 3], title=c)
     
-    # label_mapping = {"NO": 0, '<30': 1, '>30': 2}
+    # plt.figure()
+    # data_y.value_counts().plot(kind='barh', title=data_y.columns[0])
+
+    # Task 1
+    label_mapping = {"NO": 0, '<30': 1, '>30': 2}
+    data_y = data_y.iloc[:, 0].map(label_mapping)
+    
+    # Task 2
+    # data_X1 = data.iloc[:, 0:3]
+    # data_X2 = data.iloc[:, 5:50]
+    # data_X = pd.concat([data_X1, data_X2], axis=1)
+    # data_y = data.iloc[:, 4:5]
+
+    # label_mapping = {"[0-10)": 0,"[10-20)": 0,"[20-30)": 0,"[30-40)": 0,"[40-50)": 0,"[50-60)": 1,"[60-70)": 1, '[70-80)': 2, '[80-90)': 2, '[90-100)': 2}
     # data_y = data_y.iloc[:, 0].map(label_mapping)
-    # model_smote = SMOTEENN(random_state=42)
-    # data_X,data_y = model_smote.fit_sample(data_X,data_y) 
-    # data_fe = pd.concat([data_y, data_X], axis=1)
 
-    # print(data_y.value_counts())
 
-    # data_fe.to_csv(r'data_fe.csv', mode='w+', index=False)
+    exclude_columns = exclude_columns + ['examide', 'citoglipton', 'weight', 'payer_code']
+    category_columns = data_X.columns.to_list()
+    for c in exclude_columns:
+        category_columns.remove(c)
+    for c in numeric_columns:
+        category_columns.remove(c)
+
+    data_X = data_X.drop(exclude_columns, axis=1)
+   
+    diag_mapping =  get_diag_mapping(data_X['diag_1'].astype(str),data_X['diag_2'].astype(str),data_X['diag_3'].astype(str))
+    data_X['diag_1'] = data_X['diag_1'].map(diag_mapping)
+    data_X['diag_2'] = data_X['diag_2'].map(diag_mapping)
+    data_X['diag_3'] = data_X['diag_3'].map(diag_mapping)
+
+   
+    for f_pair in [['A1Cresult', 'change'],['age', 'gender']]:
+        data_X['_'.join(f_pair)] = data_X[f_pair[0]]+data_X[f_pair[1]]
+        category_columns.append('_'.join(f_pair))
+    # data_X = pd.get_dummies(data_X, columns=category_columns)
+    label_columns=['age']
+
+    for cat in label_columns:
+        data_X[cat] = LabelEncoder().fit_transform(data_X[cat].astype(str))
+    
+    dummy_columns = category_columns
+    for c in label_columns:
+        dummy_columns = category_columns.remove(c)
+
+    data_X = pd.get_dummies(data_X, columns=dummy_columns)
+
+    data_X[numeric_columns] = StandardScaler().fit_transform(data_X[numeric_columns])
+
+    # data_X = data_X.drop(['diag_2', 'diag_3'], axis=1)
+
+    print(data_y.value_counts())
+
+    model_smote = SMOTE(random_state=42)
+    data_X,data_y = model_smote.fit_sample(data_X,data_y)
+
+    print(data_X.shape)
+    
+    lr = LogisticRegression(penalty="l1",solver='liblinear').fit(data_X, data_y)
+    model = SelectFromModel(lr, prefit=True)
+    data_X = pd.DataFrame(model.transform(data_X))
+
+    print(data_X.shape)
+
+    data_fe = pd.concat([data_y, data_X], axis=1)
+
+    print(data_y.value_counts())
+    # data_fe = data_fe[~pd.isnull(data_fe[0, 0])]
+
+    data_fe.to_csv(r'data_fe1.csv', mode='w+', index=False)
 
     plt.show()
 
