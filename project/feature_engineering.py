@@ -7,6 +7,7 @@ from imblearn.combine import SMOTEENN
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.feature_selection import SelectFromModel
+from imblearn.under_sampling import NearMiss
 
 numeric_columns = ['time_in_hospital', 'num_lab_procedures', 'num_procedures',
                    'num_medications', 'number_outpatient', 'number_emergency', 'number_inpatient', 'number_diagnoses']
@@ -145,50 +146,78 @@ if __name__ == "__main__":
     # data_y = data_y.iloc[:, 0].map(label_mapping)
 
 
-    exclude_columns = exclude_columns + ['examide', 'citoglipton', 'weight', 'payer_code']
+    exclude_columns = exclude_columns + ['weight', 'payer_code','medical_specialty']
+
+    exclude_columns = exclude_columns + ['metformin', 'repaglinide', 'nateglinide', 'chlorpropamide', 'glimepiride', 
+            'acetohexamide', 'glipizide', 'glyburide', 'tolbutamide', 'pioglitazone', 
+            'rosiglitazone', 'acarbose', 'miglitol', 'troglitazone', 'tolazamide', 'examide', 
+            'citoglipton', 'glyburide-metformin', 'glipizide-metformin', 'glimepiride-pioglitazone',
+            'metformin-rosiglitazone', 'metformin-pioglitazone']
+    exclude_columns= exclude_columns+['diag_2', 'diag_3']
+
     category_columns = data_X.columns.to_list()
     for c in exclude_columns:
         category_columns.remove(c)
     for c in numeric_columns:
         category_columns.remove(c)
 
+    top_10 = ['UNK','InternalMedicine','Emergency/Trauma',\
+          'Family/GeneralPractice', 'Cardiology','Surgery-General' ,\
+          'Nephrology','Orthopedics',\
+          'Orthopedics-Reconstructive','Radiologist']
+    data_X['med_spec'] = data_X['medical_specialty'].copy()
+    data_X.loc[~data_X.med_spec.isin(top_10),'med_spec'] = 'Other'
+    category_columns.append('med_spec')
+
     data_X = data_X.drop(exclude_columns, axis=1)
    
-    diag_mapping =  get_diag_mapping(data_X['diag_1'].astype(str),data_X['diag_2'].astype(str),data_X['diag_3'].astype(str))
+    diag_mapping =  get_diag_mapping(data['diag_1'].astype(str),data['diag_2'].astype(str),data['diag_3'].astype(str))
     data_X['diag_1'] = data_X['diag_1'].map(diag_mapping)
-    data_X['diag_2'] = data_X['diag_2'].map(diag_mapping)
-    data_X['diag_3'] = data_X['diag_3'].map(diag_mapping)
+    # data_X['diag_2'] = data_X['diag_2'].map(diag_mapping)
+    # data_X['diag_3'] = data_X['diag_3'].map(diag_mapping)
 
-   
-    for f_pair in [['A1Cresult', 'change'],['age', 'gender']]:
+  
+    data_X['discharge_disposition_id'] = pd.Series(['Home' if val == 1 else 'Other discharge' 
+                                              for val in data_X['discharge_disposition_id']], index=data_X.index)
+    data_X['admission_source_id'] = pd.Series(['Emergency Room' if val == 7 else 'Referral' if val == 1 else 'Other source' 
+                                              for val in data_X['admission_source_id']], index=data_X.index)
+    data_X['admission_type_id'] = pd.Series(['Emergency' if val == 1 else 'Other type' 
+                                              for val in data_X['admission_type_id']], index=data_X.index)
+
+
+    for f_pair in [['A1Cresult', 'change'],['age', 'gender'],['age','med_spec'],['race','discharge_disposition_id']]:
         data_X['_'.join(f_pair)] = data_X[f_pair[0]]+data_X[f_pair[1]]
         category_columns.append('_'.join(f_pair))
-    # data_X = pd.get_dummies(data_X, columns=category_columns)
+    
+    age_mapping = {"[0-10)": 1,"[10-20)": 1,"[20-30)":1,"[30-40)": 2,"[40-50)": 2,"[50-60)": 2,"[60-70)": 3, '[70-80)': 3, '[80-90)': 3, '[90-100)': 3}
+    data_X['age'] = data_X['age'].map(age_mapping)
     label_columns=['age']
-
     for cat in label_columns:
         data_X[cat] = LabelEncoder().fit_transform(data_X[cat].astype(str))
     
     dummy_columns = category_columns
     for c in label_columns:
-        dummy_columns = category_columns.remove(c)
+        dummy_columns.remove(c)
 
     data_X = pd.get_dummies(data_X, columns=dummy_columns)
 
+    # data_X['number_outpatient'] = data_X['number_outpatient'].apply(lambda x: np.sqrt(x + 0.5))
+    # data_X['number_emergency'] = data_X['number_emergency'].apply(lambda x: np.sqrt(x + 0.5))
+    # data_X['number_inpatient'] = data_X['number_inpatient'].apply(lambda x: np.sqrt(x + 0.5))
+
     data_X[numeric_columns] = StandardScaler().fit_transform(data_X[numeric_columns])
 
-    # data_X = data_X.drop(['diag_2', 'diag_3'], axis=1)
-
     print(data_y.value_counts())
+    print(data_X.shape)
 
     model_smote = SMOTE(random_state=42)
     data_X,data_y = model_smote.fit_sample(data_X,data_y)
 
     print(data_X.shape)
-    
-    lr = LogisticRegression(penalty="l1",solver='liblinear').fit(data_X, data_y)
-    model = SelectFromModel(lr, prefit=True)
-    data_X = pd.DataFrame(model.transform(data_X))
+
+    # lr = LogisticRegression(penalty="l1",solver='liblinear').fit(data_X, data_y)
+    # model = SelectFromModel(lr, prefit=True)
+    # data_X = pd.DataFrame(model.transform(data_X))
 
     print(data_X.shape)
 
