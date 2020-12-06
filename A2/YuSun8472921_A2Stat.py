@@ -11,17 +11,17 @@ n4 = np.array([0.7042,0.9540,0.9788,0.9802,0.9676,0.9706,0.9103,0.5538,0.7250,0.
 n5 = np.array([0.8536,0.9834,0.9848,0.9800,0.9651,0.9799,0.9743,0.5635,0.6604,0.5792])
 n6 = np.array([0.5983,0.9699,0.9936,0.9967,0.9856,0.9940,0.9868,0.5919,0.7832,0.8011])
 
-# nn=[n1, n2, n3, n4, n5 , n6]
+nn=[n1, n2, n3, n4, n5 , n6]
 
-# for i in range(6):
-#      print(nn[i].mean())
+for i in range(6):
+     print(nn[i].mean())
 
-# r=""
-# for i in range(6):
-#     for j in range(i+1,6):
-#         temp = stats.ttest_rel(nn[i],nn[j])
-#         r =r +str(np.around(temp[1],4)) + " & "
-# print(r)
+r=""
+for i in range(6):
+    for j in range(i+1,6):
+        temp = stats.ttest_rel(nn[i],nn[j])
+        r =r +str(np.around(temp[1],4)) + " & "
+print(r)
 
 # res=[]
 # for i in range(6):
@@ -80,34 +80,34 @@ n6 = np.array([0.5983,0.9699,0.9936,0.9967,0.9856,0.9940,0.9868,0.5919,0.7832,0.
 # print(stats.ttest_rel(nn1[4],nn1[3]))
 # print(stats.ttest_rel(nn1[5],nn1[3]))
 
-data1 = [1,2]
-data2 = [1,2]
-data3 = [2,1]
-data4 = [1,2]
-data5 = [2,1]
-data6 = [1,2]
-data7 = [2,1]
-data8 = [1,2]
+# data1 = [1,2]
+# data2 = [1,2]
+# data3 = [2,1]
+# data4 = [1,2]
+# data5 = [2,1]
+# data6 = [1,2]
+# data7 = [2,1]
+# data8 = [1,2]
 
-data=[data1,data2,data3,data4,data5,data6,data7,data8]
-data=np.array(data)
+# data=[data1,data2,data3,data4,data5,data6,data7,data8]
+# data=np.array(data)
 
-r1=data.mean()
-n=4
-k=3
-t1=n* np.sum((data.mean(axis=0)-r1)* (data.mean(axis=0)-r1))
-t2=(1/(n*(k-1)))*np.sum((data-r1) * (data-r1))
+# r1=data.mean()
+# n=4
+# k=3
+# t1=n* np.sum((data.mean(axis=0)-r1)* (data.mean(axis=0)-r1))
+# t2=(1/(n*(k-1)))*np.sum((data-r1) * (data-r1))
 
-print(t1/t2)
-stat, p = friedmanchisquare(data1, data2, data3,data4)
-print(stat)
-print(p)
+# print(t1/t2)
+# stat, p = friedmanchisquare(data1, data2, data3,data4)
+# print(stat)
+# print(p)
 
-from Orange.evaluation import compute_CD,graph_ranks
-import matplotlib.pyplot as plt
-names = ["SVM", "KNN", "RF" ]
-avranks =  [2.5, 1.5, 1.75]
-cd = compute_CD(avranks, 4) #tested on 4 datasets
-# print(cd)
-graph_ranks(avranks, names, cd=cd, width=6, textspace=1.5)
-plt.show()
+# from Orange.evaluation import compute_CD,graph_ranks
+# import matplotlib.pyplot as plt
+# names = ["SVM", "KNN", "RF" ]
+# avranks =  [2.5, 1.5, 1.75]
+# cd = compute_CD(avranks, 4) #tested on 4 datasets
+# # print(cd)
+# graph_ranks(avranks, names, cd=cd, width=6, textspace=1.5)
+# plt.show()
