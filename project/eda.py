@@ -23,6 +23,7 @@ if __name__ == "__main__":
     data_X = data.iloc[:, 0:49]
     data_y = data.iloc[:, 49:50]
 
+    data_X.groupby("patient_nbr")
     numeric_data = data_X[numeric_columns]
     numeric_data.hist()
     print(numeric_data.skew())
@@ -85,6 +86,7 @@ if __name__ == "__main__":
     
     plt.figure()
     data_y.value_counts().plot(kind='barh', title=data_y.columns[0])
+    print(data_y.value_counts())
 
     data_y = data.iloc[:, 4:5]
     plt.figure()

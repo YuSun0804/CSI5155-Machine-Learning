@@ -112,7 +112,7 @@ def self_training(X_train, X_test, y_train, y_test):
     predict_probs.append(y_pre_proba)
     y_tests.append(y_test)
 
-mask_percentage = [0,0.1]
+mask_percentage = [0,0.1,0.2,0.5,0.9,0.95]
 
 def train_predict_no_cv(title, clf,  X_train, X_test, y_train, y_test):
     print(title)
@@ -203,6 +203,12 @@ def plot_roc(labels, predict_prob, title):
     fpr = dict()
     tpr = dict()
     roc_auc = dict()
+
+    index = np.arange(0,len(predict_prob))
+    index = index[~np.isnan(predict_prob)[:,0]]
+    labels = labels.iloc[index]
+    predict_prob= predict_prob[index]
+
     for i in range(len(predict_prob[0])):
         fpr[i], tpr[i], _ = roc_curve(labels[i], predict_prob[:, i])
         roc_auc[i] = auc(fpr[i], tpr[i])
@@ -240,12 +246,12 @@ if __name__ == "__main__":
     print(data_y.value_counts())
 
     # # supervised learning
-    # supervised_clfs={}
-    # supervised_clfs['Random Forest'] = RandomForestClassifier()
-    # supervised_clfs['SVM'] = svm.LinearSVC(dual=False)
-    # supervised_clfs['Decision Tree'] = DecisionTreeClassifier()
-    # supervised_clfs['Naive Bayesian'] = GaussianNB()
-    # supervised_clfs['KNN'] = KNeighborsClassifier(n_neighbors=3,n_jobs=-1)
+    supervised_clfs={}
+    supervised_clfs['Random Forest'] = RandomForestClassifier(min_samples_split =3)
+    supervised_clfs['SVM'] = svm.LinearSVC(dual=False)
+    supervised_clfs['Decision Tree'] = DecisionTreeClassifier(min_samples_split =3)
+    supervised_clfs['Naive Bayesian'] = GaussianNB()
+    supervised_clfs['KNN'] = KNeighborsClassifier(n_neighbors=3,n_jobs=-1)
     
     # for k,v in supervised_clfs.items():
     #     train_predict_cv(k, v, data_X, data_y)
@@ -253,8 +259,8 @@ if __name__ == "__main__":
     # semi-supervised learning
     X_train, X_test, y_train, y_test = train_test_split(data_X, data_y, test_size=0.33, random_state=42)
     semi_supervised_clfs = {}
-    # semi_supervised_clfs['LP'] = LabelPropagation(kernel='knn')
-    # semi_supervised_clfs['LS'] = LabelSpreading(kernel='knn')
+    # semi_supervised_clfs['LabelPropagation with KNN'] = LabelPropagation(kernel='knn')
+    # semi_supervised_clfs['LabelSpreading with KNN'] = LabelSpreading(kernel='knn')
     semi_supervised_clfs['self_training'] = {}
 
     for k,v in semi_supervised_clfs.items():
